@@ -10,6 +10,40 @@ jQuery(function($){
 
     var Audio = {
 
+        /*
+         *
+         * Create the Audio context
+         *
+         */
+        successSoundBuffer: null,
+        init: function() {
+            try {
+                // Fix up for prefixing
+                window.AudioContext = window.AudioContext||window.webkitAudioContext;
+                var context = new AudioContext();
+                console.log(context);
+                this.loadSound('http:localhost:8080/sounds/', context);
+            }
+            catch(e) {
+                alert('Web Audio API is not supported in this browser');
+            }
+        },
+        loadSound: function(url, context) {
+          var request = new XMLHttpRequest();
+          request.open('GET', url, true);
+          request.responseType = 'arraybuffer';
+
+          // Decode asynchronously
+          request.onload = function() {
+            context.decodeAudioData(request.response, function(buffer) {
+              this.successSoundBuffer = buffer;
+            }, function(){
+                console.log('an error occured');
+            });
+          }
+          request.send();
+        },
+
         theSoundOfSuccess: function(){
             console.log('play the sound of success!!!!');
         },
@@ -646,6 +680,7 @@ jQuery(function($){
 
     };
 
+    Audio.init();
     IO.init();
     App.init();
 
