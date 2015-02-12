@@ -1,6 +1,23 @@
-;
+
 jQuery(function($){    
     'use strict';
+
+    /**
+     *
+     * Game Audio
+     *
+     */
+
+    var Audio = {
+
+        theSoundOfSuccess: function(){
+            console.log('play the sound of success!!!!');
+        },
+
+        theSoundOfFailure: function(){
+            console.log('You have failed at life, start again!!!');
+        }
+    };
 
     /**
      * All the code relevant to Socket.IO is collected in the IO namespace.
@@ -351,6 +368,9 @@ jQuery(function($){
                         // Add 5 to the player's score
                         $pScore.text( +$pScore.text() + 5 );
 
+                        // Play the success sound
+                        Audio.theSoundOfSuccess();
+
                         // Advance the round
                         App.currentRound += 1;
 
@@ -364,6 +384,10 @@ jQuery(function($){
                         IO.socket.emit('hostNextRound',data);
 
                     } else {
+                        
+                        // Play the fail sound
+                        Audio.theSoundOfFailure();  
+
                         // A wrong answer was submitted, so decrement the player's score.
                         $pScore.text( +$pScore.text() - 3 );
                     }
