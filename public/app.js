@@ -15,41 +15,60 @@ jQuery(function($){
          * Create the Audio context
          *
          */
-        successSoundBuffer: null,
         init: function() {
             try {
+                var _this = this;
                 // Fix up for prefixing
-                window.AudioContext = window.AudioContext||window.webkitAudioContext;
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
                 var context = new AudioContext();
                 console.log(context);
-                this.loadSound('http:localhost:8080/sounds/', context);
+
+                this.loadSound('sounds/brass-funk-punches.wav', context, function(buffer){
+
+                    // Listen for the success event to fire
+                    $(document).on('playSuccessSound', function(){
+                        console.log('success sound should play');
+                       _this.playSound(context, buffer);
+                    });
+                });
+
+                this.loadSound('sounds/Korg-DS-8-Strings-C4.wav', context, function(buffer){
+
+                    // Listen for the success event to fire
+                    $(document).on('playFailSound', function(){
+                        console.log('fail sound should play');
+                       _this.playSound(context, buffer);
+                    });
+                });
             }
             catch(e) {
                 alert('Web Audio API is not supported in this browser');
             }
         },
-        loadSound: function(url, context) {
-          var request = new XMLHttpRequest();
-          request.open('GET', url, true);
-          request.responseType = 'arraybuffer';
+        loadSound: function(url, context, callback) {
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.responseType = 'arraybuffer';
 
-          // Decode asynchronously
-          request.onload = function() {
-            context.decodeAudioData(request.response, function(buffer) {
-              this.successSoundBuffer = buffer;
-            }, function(){
-                console.log('an error occured');
-            });
-          }
-          request.send();
+            // Decode asynchronously
+            request.onload = function() {
+                context.decodeAudioData(request.response, function(buffer) {
+                    console.log(buffer);
+                    callback(buffer);
+                }, function(){
+                    console.log('an error occured');
+                });
+            }
+            request.send();
         },
-
-        theSoundOfSuccess: function(){
-            console.log('play the sound of success!!!!');
-        },
-
-        theSoundOfFailure: function(){
-            console.log('You have failed at life, start again!!!');
+        playSound: function(context, buffer, time) {
+            var _time = time || 0;
+            console.log(buffer);
+            var source = context.createBufferSource(); // creates a sound source
+            source.buffer = buffer;                    // tell the source which sound to play
+            source.connect(context.destination);       // connect the source to the context's destination (the speakers)
+            source.start(_time);                           // play the source now
+                                                     // note: on older systems, may have to use deprecated noteOn(time);
         }
     };
 
@@ -403,7 +422,7 @@ jQuery(function($){
                         $pScore.text( +$pScore.text() + 5 );
 
                         // Play the success sound
-                        Audio.theSoundOfSuccess();
+                        $(document).trigger('playSuccessSound');
 
                         // Advance the round
                         App.currentRound += 1;
@@ -420,7 +439,7 @@ jQuery(function($){
                     } else {
                         
                         // Play the fail sound
-                        Audio.theSoundOfFailure();  
+                        $(document).trigger('playFailSound');
 
                         // A wrong answer was submitted, so decrement the player's score.
                         $pScore.text( +$pScore.text() - 3 );
