@@ -17,29 +17,12 @@ jQuery(function($){
          */
         init: function() {
             try {
-                var _this = this;
+
                 // Fix up for prefixing
                 window.AudioContext = window.AudioContext || window.webkitAudioContext;
                 var context = new AudioContext();
-                console.log(context);
 
-                this.loadSound('sounds/brass-funk-punches.wav', context, function(buffer){
-
-                    // Listen for the success event to fire
-                    $(document).on('playSuccessSound', function(){
-                        console.log('success sound should play');
-                       _this.playSound(context, buffer);
-                    });
-                });
-
-                this.loadSound('sounds/Korg-DS-8-Strings-C4.wav', context, function(buffer){
-
-                    // Listen for the success event to fire
-                    $(document).on('playFailSound', function(){
-                        console.log('fail sound should play');
-                       _this.playSound(context, buffer);
-                    });
-                });
+                this.audioQueues(context);
             }
             catch(e) {
                 alert('Web Audio API is not supported in this browser');
@@ -53,7 +36,6 @@ jQuery(function($){
             // Decode asynchronously
             request.onload = function() {
                 context.decodeAudioData(request.response, function(buffer) {
-                    console.log(buffer);
                     callback(buffer);
                 }, function(){
                     console.log('an error occured');
@@ -63,12 +45,31 @@ jQuery(function($){
         },
         playSound: function(context, buffer, time) {
             var _time = time || 0;
-            console.log(buffer);
             var source = context.createBufferSource(); // creates a sound source
             source.buffer = buffer;                    // tell the source which sound to play
             source.connect(context.destination);       // connect the source to the context's destination (the speakers)
             source.start(_time);                           // play the source now
                                                      // note: on older systems, may have to use deprecated noteOn(time);
+        },
+        audioQueues: function(context){
+            var _this = this;
+            this.loadSound('sounds/brass-funk-punches.wav', context, function(buffer){
+
+                // Listen for the success event to fire
+                $(document).on('playSuccessSound', function(){
+                    console.log('success sound should play');
+                   _this.playSound(context, buffer);
+                });
+            });
+
+            this.loadSound('sounds/short-sigh.wav', context, function(buffer){
+
+                // Listen for the success event to fire
+                $(document).on('playFailSound', function(){
+                    console.log('fail sound should play');
+                   _this.playSound(context, buffer);
+                });
+            });
         }
     };
 
