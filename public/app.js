@@ -1,6 +1,84 @@
-;
+
 jQuery(function($){    
     'use strict';
+
+    /**
+     *
+     * Game Audio
+     *
+     */
+
+    var Audio = {
+
+        /**
+         *
+         * Create the Audio context
+         *
+         */
+        init: function() {
+            try {
+
+                // Fix up for prefixing
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                var context = new AudioContext();
+                this.audioQueues(context);
+            }
+            catch(e) {
+                alert('Web Audio API is not supported in this browser');
+            }
+        },
+        loadSound: function(url, context, callback) {
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.responseType = 'arraybuffer';
+
+            // Decode asynchronously
+            request.onload = function() {
+                context.decodeAudioData(request.response, function(buffer) {
+                    callback(buffer);
+                }, function(){
+                    console.log('an error occured');
+                });
+            }
+            request.send();
+        },
+        playSound: function(context, buffer, time) {
+            var _time = time || 0;
+
+            // creates a sound source
+            var source = context.createBufferSource();
+
+            // tell the source which sound to play 
+            source.buffer = buffer;
+
+            // connect the source to the context's destination (the speakers)                    
+            source.connect(context.destination);
+
+            // play the source now
+            // note: on older systems, may have to use deprecated noteOn(time);       
+            source.start(_time);                       
+        },
+        audioQueues: function(context){
+            var _this = this;
+            this.loadSound('sounds/brass-funk-punches.wav', context, function(buffer){
+
+                // Listen for the success event to fire
+                $(document).on('playSuccessSound', function(){
+                    console.log('success sound should play');
+                   _this.playSound(context, buffer);
+                });
+            });
+
+            this.loadSound('sounds/short-sigh.wav', context, function(buffer){
+
+                // Listen for the success event to fire
+                $(document).on('playFailSound', function(){
+                    console.log('fail sound should play');
+                   _this.playSound(context, buffer);
+                });
+            });
+        }
+    };
 
     /**
      * All the code relevant to Socket.IO is collected in the IO namespace.
@@ -351,6 +429,9 @@ jQuery(function($){
                         // Add 5 to the player's score
                         $pScore.text( +$pScore.text() + 5 );
 
+                        // Play the success sound
+                        $(document).trigger('playSuccessSound');
+
                         // Advance the round
                         App.currentRound += 1;
 
@@ -364,6 +445,10 @@ jQuery(function($){
                         IO.socket.emit('hostNextRound',data);
 
                     } else {
+                        
+                        // Play the fail sound
+                        $(document).trigger('playFailSound');
+
                         // A wrong answer was submitted, so decrement the player's score.
                         $pScore.text( +$pScore.text() - 3 );
                     }
@@ -622,6 +707,7 @@ jQuery(function($){
 
     };
 
+    Audio.init();
     IO.init();
     App.init();
 
