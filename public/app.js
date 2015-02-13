@@ -609,14 +609,14 @@ jQuery(function($){
              */
             newWord : function(data) {
                 // Create an unordered list element
-                var $list = $('<ul/>').attr('id','ulAnswers');
+                var $list = $('<ul class="list-group"></ul>').attr('id','ulAnswers');
 
                 // Insert a list item for each word in the word list
                 // received from the server.
                 $.each(data.list, function(){
                     $list                                //  <ul> </ul>
-                        .append( $('<li/>')              //  <ul> <li> </li> </ul>
-                            .append( $('<button/>')      //  <ul> <li> <button> </button> </li> </ul>
+                        .append( $('<li class="list-group-item"></li>')              //  <ul> <li> </li> </ul>
+                            .append( $('<button class="btn-full-width"></button>')      //  <ul> <li> <button> </button> </li> </ul>
                                 .addClass('btnAnswer')   //  <ul> <li> <button class='btnAnswer'> </button> </li> </ul>
                                 .addClass('btn')         //  <ul> <li> <button class='btnAnswer'> </button> </li> </ul>
                                 .val(this)               //  <ul> <li> <button class='btnAnswer' value='word'> </button> </li> </ul>
