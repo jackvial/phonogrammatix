@@ -33,5 +33,3 @@ io.sockets.on('connection', function (socket) {
     //console.log('client connected');
     agx.initGame(io, socket);
 });
-
-

@@ -10,7 +10,7 @@ jQuery(function($){
 
     var Audio = {
 
-        /*
+        /**
          *
          * Create the Audio context
          *
@@ -21,7 +21,6 @@ jQuery(function($){
                 // Fix up for prefixing
                 window.AudioContext = window.AudioContext || window.webkitAudioContext;
                 var context = new AudioContext();
-
                 this.audioQueues(context);
             }
             catch(e) {
@@ -45,11 +44,19 @@ jQuery(function($){
         },
         playSound: function(context, buffer, time) {
             var _time = time || 0;
-            var source = context.createBufferSource(); // creates a sound source
-            source.buffer = buffer;                    // tell the source which sound to play
-            source.connect(context.destination);       // connect the source to the context's destination (the speakers)
-            source.start(_time);                           // play the source now
-                                                     // note: on older systems, may have to use deprecated noteOn(time);
+
+            // creates a sound source
+            var source = context.createBufferSource();
+
+            // tell the source which sound to play 
+            source.buffer = buffer;
+
+            // connect the source to the context's destination (the speakers)                    
+            source.connect(context.destination);
+
+            // play the source now
+            // note: on older systems, may have to use deprecated noteOn(time);       
+            source.start(_time);                       
         },
         audioQueues: function(context){
             var _this = this;
