@@ -104,19 +104,19 @@
     <!-- This screen appears when a player clicks "JOIN" on the Title Screen -->
     <script id="join-game-template" type="text/template">
         <div class="joinGameWrapper">
-            <div class="row text-center">
-                <div class="col-lg-12">
-                    <div class="info input-group">
+            <div class="row">
+                <div class="col-lg-4 col-lg-offset-4">
+                    <div class="join-input input-group">
                         <label for="inputPlayerName">Your Name:</label>
                         <input id="inputPlayerName" class="form-control" type="text" />
                     </div>
-
-                    <div class="info input-group">
+       
+                    <div class="join-input input-group">
                         <label for="inputGameId">Game ID:</label>
                         <input id="inputGameId" class="form-control" type="text"/>
                     </div>
-
-                    <div class="info buttons input-group">
+           
+                    <div class="join-input buttons input-group">
                         <button id="btnStart" class="btn btn-lg btn-primary">Start</button>
                         <div id="playerWaitingMessage"></div>
                     </div>
@@ -127,15 +127,27 @@
 
     <!-- This is the 'Host' screen. It displays the word for each player to match -->
     <script id="host-game-template" type="text/template">
-        <div id="wordArea">
-            <div id="hostWord">5</div>
-        </div>
-        <div id="playerScores">
-            <div id="player1Score" class="playerScore">
-                <span class="score">0</span><span class="playerName">Player 1</span>
+        <div class="row">
+            <div class="col-lg-6">
+                <div id="playerScores">
+                    <div id="player1Score" class="playerScore">
+                        <div class="score">0</div><div class="playerName">Player 1</div>
+                    </div>
+                </div>
             </div>
-            <div id="player2Score" class="playerScore">
-                <span class="playerName">Player 2</span><span class="score">0</span>
+            <div class="col-lg-6">
+                <div>
+                    <div id="player2Score" class="playerScore">
+                        <div class="playerName">Player 2</div><div class="score">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="wordArea">
+                    <div id="hostWord">5</div>
+                </div>
             </div>
         </div>
     </script>
