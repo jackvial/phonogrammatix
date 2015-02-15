@@ -60,6 +60,20 @@ jQuery(function($){
         },
         audioQueues: function(context){
             var _this = this;
+
+            /** 
+             *
+             *  Main background music: J Miller - Won't Be Long (Internet Archive)
+             *  Maybe add support for multiple tracks
+             *
+             */
+
+            // Main track plays on page load
+            this.loadSound('sounds/jimiller20140913t-01.ogg', context, function(buffer){
+                    console.log('Main track begins...');
+                   _this.playSound(context, buffer);
+            });
+
             this.loadSound('sounds/brass-funk-punches.wav', context, function(buffer){
 
                 // Listen for the success event to fire
