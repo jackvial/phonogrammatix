@@ -355,7 +355,7 @@ PgApp.Game = {
                     $pScore.text( +$pScore.text() + 5 );
 
                     // Play the success sound
-                    $(document).trigger('playSuccessSound');
+                    PgApp.Game.$doc.trigger('playSuccessSound');
 
                     // Advance the round
                     PgApp.Game.currentRound += 1;
@@ -372,7 +372,7 @@ PgApp.Game = {
                 } else {
                     
                     // Play the fail sound
-                    $(document).trigger('playFailSound');
+                    PgApp.Game.$doc.trigger('playFailSound');
 
                     // A wrong answer was submitted, so decrement the player's score.
                     $pScore.text( +$pScore.text() - 3 );
