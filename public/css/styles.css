@@ -23,3 +23,12 @@
 	padding: 1em;
 	background-color: red;
 }
+
+#volume-control {
+	width: 50%;
+	float: left;
+}
+
+label {
+	float: left;
+}
