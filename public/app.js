@@ -105,7 +105,16 @@ jQuery(function($){
                     console.log('fail sound should play');
                    _this.playSound(context, masterGain, buffer);
                 });
-            });
+            });;
+
+            this.loadSound('sounds/button5.wav', context, function(buffer){
+
+                // Listen for a button click
+                App.$doc.on('click', 'button', function(){
+                    console.log('button click sound should play');
+                   _this.playSound(context, masterGain, buffer);
+                });
+            })
 
         }
     };
