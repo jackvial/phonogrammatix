@@ -4,7 +4,7 @@ jQuery(function($){
 
     /**
      *
-     * Game Audio
+     * Game Audio Engine
      *
      */
 
@@ -21,7 +21,14 @@ jQuery(function($){
                 // Fix up for prefixing
                 window.AudioContext = window.AudioContext || window.webkitAudioContext;
                 var context = new AudioContext();
-                this.audioQueues(context);
+
+                // Gain node for the master volume control
+                var masterGain = context.createGain();
+                masterGain.gain.value = 0.5;
+                masterGain.connect(context.destination);
+
+                this.masterVolume(masterGain);
+                this.audioQueues(context, masterGain);
             }
             catch(e) {
                 alert('Web Audio API is not supported in this browser');
@@ -42,7 +49,7 @@ jQuery(function($){
             }
             request.send();
         },
-        playSound: function(context, buffer, time) {
+        playSound: function(context, masterVolume, buffer, time) {
             var _time = time || 0;
 
             // creates a sound source
@@ -52,13 +59,21 @@ jQuery(function($){
             source.buffer = buffer;
 
             // connect the source to the context's destination (the speakers)                    
-            source.connect(context.destination);
+            source.connect(masterVolume);
 
             // play the source now
             // note: on older systems, may have to use deprecated noteOn(time);       
             source.start(_time);                       
         },
-        audioQueues: function(context){
+        masterVolume: function(masterGain){
+            $('#volume-control').on('change', function(e){
+                console.log(+$(this).val());
+
+                // Update the master gain, plus sign converts to numeric
+                masterGain.gain.value = +$(this).val();
+            });
+        },
+        audioQueues: function(context, masterGain){
             var _this = this;
 
             /** 
@@ -71,15 +86,15 @@ jQuery(function($){
             // Main track plays on page load
             this.loadSound('sounds/jimiller20140913t-01.ogg', context, function(buffer){
                     console.log('Main track begins...');
-                   _this.playSound(context, buffer);
+                   _this.playSound(context, masterGain, buffer);
             });
-
+            
             this.loadSound('sounds/brass-funk-punches.wav', context, function(buffer){
 
                 // Listen for the success event to fire
                 $(document).on('playSuccessSound', function(){
                     console.log('success sound should play');
-                   _this.playSound(context, buffer);
+                   _this.playSound(context, masterGain, buffer);
                 });
             });
 
@@ -88,9 +103,10 @@ jQuery(function($){
                 // Listen for the success event to fire
                 $(document).on('playFailSound', function(){
                     console.log('fail sound should play');
-                   _this.playSound(context, buffer);
+                   _this.playSound(context, masterGain, buffer);
                 });
             });
+
         }
     };
 
