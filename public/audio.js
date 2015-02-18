@@ -72,6 +72,17 @@ PgApp.Audio = {
             masterGain.gain.value = +$(this).val();
         });
     },
+    muteOff: false,
+    muteSwitch: function(context, masterGain) {
+        if(!this.muteOff){
+            masterGain.disconnect();
+            this.muteOff = true;
+        } else {
+            masterGain.connect(context.destination);
+            this.muteOff = false;
+        }
+        
+    },
     audioQueues: function(context, masterGain){
         var _this = this;
 
@@ -113,7 +124,11 @@ PgApp.Audio = {
                 console.log('button click sound should play');
                _this.playSound(context, masterGain, buffer);
             });
-        })
+        });
+
+        $('#mute-btn').on('click', function(){
+            _this.muteSwitch(context, masterGain);
+        });
 
     }
 };
