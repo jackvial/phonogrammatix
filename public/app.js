@@ -1,4 +1,4 @@
-var PgApp = PgApp || {};
+    var PgApp = PgApp || {};
 
 ;(function($, PgApp){
     'use strict';
@@ -15,9 +15,11 @@ PgApp.IO = {
      * This is called when the page is displayed. It connects the Socket.IO client
      * to the Socket.IO server
      */
+
+    // socket needs to be publicly accessible
+    socket: io.connect(),
     init: function() {
-        PgApp.IO.socket = io.connect();
-        PgApp.IO.bindEvents();
+        this.bindEvents();
     },
 
     /**
@@ -25,22 +27,25 @@ PgApp.IO = {
      * by the Socket.PgApp.IO server, then run the appropriate function.
      */
     bindEvents : function() {
-        PgApp.IO.socket.on('connected', PgApp.IO.onConnected );
-        PgApp.IO.socket.on('newGameCreated', PgApp.IO.onNewGameCreated );
-        PgApp.IO.socket.on('playerJoinedRoom', PgApp.IO.playerJoinedRoom );
-        PgApp.IO.socket.on('beginNewGame', PgApp.IO.beginNewGame );
-        PgApp.IO.socket.on('newWordData', PgApp.IO.onNewWordData);
-        PgApp.IO.socket.on('hostCheckAnswer', PgApp.IO.hostCheckAnswer);
-        PgApp.IO.socket.on('gameOver', PgApp.IO.gameOver);
-        PgApp.IO.socket.on('error', PgApp.IO.error );
+        this.socket.on('connected', function(){
+            this.onConnected();    
+        }.bind(this));
+        this.socket.on('newGameCreated', this.onNewGameCreated );
+        this.socket.on('playerJoinedRoom', this.playerJoinedRoom );
+        this.socket.on('beginNewGame', this.beginNewGame );
+        this.socket.on('newWordData', this.onNewWordData);
+        this.socket.on('hostCheckAnswer', this.hostCheckAnswer);
+        this.socket.on('gameOver', this.gameOver);
+        this.socket.on('error', this.socketError );
     },
 
     /**
      * The client is successfully connected!
      */
     onConnected : function() {
+
         // Cache a copy of the client's socket.PgApp.IO session ID on the PgApp.Game
-        PgApp.Game.mySocketId = PgApp.IO.socket.socket.sessionid;
+        PgApp.Game.mySocketId = this.socket.socket.sessionid;
         // console.log(data.message);
     },
 
@@ -108,12 +113,28 @@ PgApp.IO = {
      * An error has occurred.
      * @param data
      */
-    error : function(data) {
+    socketError : function(data) {
         alert(data.message);
     }
 
 };
 
+/**
+ * Cache the element selectors
+ * I find creating another object for the selectors is better
+ * than messing around with 'this'
+ */
+
+var gElem = {
+    $doc: $(document),
+
+    // Templates
+    $gameArea: $('#gameArea'),
+    $templateIntroScreen: $('#intro-screen-template').html(),
+    $templateNewGame: $('#create-game-template').html(),
+    $templateJoinGame: $('#join-game-template').html(),
+    $hostGame: $('#host-game-template').html()
+};
 
 PgApp.Game = {
 
@@ -150,26 +171,11 @@ PgApp.Game = {
      * This runs when the page initially loads.
      */
     init: function () {
-        PgApp.Game.cacheElements();
-        PgApp.Game.showInitScreen();
-        PgApp.Game.bindEvents();
+        this.showInitScreen();
+        this.bindEvents();
 
         // Initialize the fastclick library
         FastClick.attach(document.body);
-    },
-
-    /**
-     * Create references to on-screen elements used throughout the game.
-     */
-    cacheElements: function () {
-        PgApp.Game.$doc = $(document);
-
-        // Templates
-        PgApp.Game.$gameArea = $('#gameArea');
-        PgApp.Game.$templateIntroScreen = $('#intro-screen-template').html();
-        PgApp.Game.$templateNewGame = $('#create-game-template').html();
-        PgApp.Game.$templateJoinGame = $('#join-game-template').html();
-        PgApp.Game.$hostGame = $('#host-game-template').html();
     },
 
     /**
@@ -177,13 +183,13 @@ PgApp.Game = {
      */
     bindEvents: function () {
         // Host
-        PgApp.Game.$doc.on('click', '#btnCreateGame', PgApp.Game.Host.onCreateClick);
+        gElem.$doc.on('click', '#btnCreateGame', PgApp.Game.Host.onCreateClick);
 
         // Player
-        PgApp.Game.$doc.on('click', '#btnJoinGame', PgApp.Game.Player.onJoinClick);
-        PgApp.Game.$doc.on('click', '#btnStart',PgApp.Game.Player.onPlayerStartClick);
-        PgApp.Game.$doc.on('click', '.btnAnswer',PgApp.Game.Player.onPlayerAnswerClick);
-        PgApp.Game.$doc.on('click', '#btnPlayerRestart', PgApp.Game.Player.onPlayerRestart);
+        gElem.$doc.on('click', '#btnJoinGame', PgApp.Game.Player.onJoinClick);
+        gElem.$doc.on('click', '#btnStart',PgApp.Game.Player.onPlayerStartClick);
+        gElem.$doc.on('click', '.btnAnswer',PgApp.Game.Player.onPlayerAnswerClick);
+        gElem.$doc.on('click', '#btnPlayerRestart', PgApp.Game.Player.onPlayerRestart);
     },
 
     /* *************************************
@@ -195,7 +201,7 @@ PgApp.Game = {
      * (with Start and Join buttons)
      */
     showInitScreen: function() {
-        PgApp.Game.$gameArea.html(PgApp.Game.$templateIntroScreen);
+        gElem.$gameArea.html(gElem.$templateIntroScreen);
         PgApp.Game.doTextFit('.title');
     },
 
@@ -254,7 +260,7 @@ PgApp.Game = {
          */
         displayNewGameScreen : function() {
             // Fill the game screen with the appropriate HTML
-            PgApp.Game.$gameArea.html(PgApp.Game.$templateNewGame);
+            gElem.$gameArea.html(gElem.$templateNewGame);
 
             // Display the URL on screen
             $('#gameURL').text(window.location.href);
@@ -299,7 +305,7 @@ PgApp.Game = {
         gameCountdown : function() {
 
             // Prepare the game screen with new HTML
-            PgApp.Game.$gameArea.html(PgApp.Game.$hostGame);
+            gElem.$gameArea.html(gElem.$hostGame);
             PgApp.Game.doTextFit('#hostWord');
 
             // Begin the on-screen countdown timer
@@ -355,7 +361,7 @@ PgApp.Game = {
                     $pScore.text( +$pScore.text() + 5 );
 
                     // Play the success sound
-                    PgApp.Game.$doc.trigger('playSuccessSound');
+                    gElem.$doc.trigger('playSuccessSound');
 
                     // Advance the round
                     PgApp.Game.currentRound += 1;
@@ -372,7 +378,7 @@ PgApp.Game = {
                 } else {
                     
                     // Play the fail sound
-                    PgApp.Game.$doc.trigger('playFailSound');
+                    gElem.$doc.trigger('playFailSound');
 
                     // A wrong answer was submitted, so decrement the player's score.
                     $pScore.text( +$pScore.text() - 3 );
@@ -417,7 +423,7 @@ PgApp.Game = {
          * A player hit the 'Start Again' button after the end of a game.
          */
         restartGame : function() {
-            PgApp.Game.$gameArea.html(PgApp.Game.$templateNewGame);
+            gElem.$gameArea.html(gElem.$templateNewGame);
             $('#spanNewGameCode').text(PgApp.Game.gameId);
         }
     },
@@ -446,7 +452,7 @@ PgApp.Game = {
             // console.log('Clicked "Join A Game"');
 
             // Display the Join Game HTML on the player's screen.
-            PgApp.Game.$gameArea.html(PgApp.Game.$templateJoinGame);
+            gElem.$gameArea.html(gElem.$templateJoinGame);
         },
 
         /**
